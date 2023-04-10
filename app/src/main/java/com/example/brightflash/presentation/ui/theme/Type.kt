@@ -1,4 +1,4 @@
-package com.example.brightflash.ui.theme
+package com.example.brightflash.presentation.ui.theme
 
 import androidx.compose.material.Typography
 import androidx.compose.ui.text.TextStyle
