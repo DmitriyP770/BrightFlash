@@ -2,5 +2,6 @@ package com.example.brightflash.util
 
 object Constants {
 
-    const val BASE_URL = "https://api.dictionaryapi.dev/api/v2/"
+    const val BASE_URL = "https://api.dictionaryapi.dev/"
+    const val SEARCH_DELAY = 800L
 }

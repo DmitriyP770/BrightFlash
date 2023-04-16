@@ -5,10 +5,8 @@ import com.example.brightflash.data.remote.DictionaryApi
 import com.example.brightflash.domain.word.WordRepository
 import com.example.brightflash.domain.word.model.Meaning
 import com.example.brightflash.domain.word.model.Word
-import com.example.brightflash.util.Resource
-import com.example.brightflash.util.toMeaning
-import com.example.brightflash.util.toWord
-import com.example.brightflash.util.toWordEntity
+import com.example.brightflash.domain.word.model.WordInfo
+import com.example.brightflash.util.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -18,12 +16,18 @@ class WordRepositoryImpl @Inject constructor(
     private val api: DictionaryApi
 ): WordRepository {
     private val dao = db.dao
-    override suspend fun getWordDefinition(word : String) : Flow<Resource<List<Meaning>>> = flow {
+    override suspend fun getWordDefinition(word : String) : Flow<Resource<WordInfo>> = flow {
+        println("sending request $word 1")
         emit(Resource.Loading())
         try {
+            println("sending request $word 2")
             val response = api.getWordsInfo(word)
-            emit(Resource.Success(data = response.first().meanings.map { it.toMeaning() }))
+            println("callcallcall ${response.first().word}")
+
+            emit(Resource.Success(data = response.first().toWordInfo()))
         } catch (e: Exception){
+            println("sending request $word 3")
+            println("callcallcall ${e.localizedMessage}")
             emit(Resource.Error(msg = e.localizedMessage ?: "An error occurred when tried to obtain definition"))
         }
     }
