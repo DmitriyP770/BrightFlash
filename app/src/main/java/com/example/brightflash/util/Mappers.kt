@@ -1,15 +1,25 @@
 package com.example.brightflash.util
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.example.brightflash.data.local.models.WordEntity
 import com.example.brightflash.data.remote.models.DefinitionDto
 import com.example.brightflash.data.remote.models.DictionaryResponseDto
 import com.example.brightflash.data.remote.models.MeaningDto
 import com.example.brightflash.data.remote.models.PhoneticDto
 import com.example.brightflash.domain.word.model.*
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 fun WordEntity.toWord() = Word(id, word, example, translation)
 
-fun Word.toWordEntity() = WordEntity(word = word, example = example, translation = translation)
+@RequiresApi(Build.VERSION_CODES.O)
+fun Word.toWordEntity() = WordEntity(
+    word = word ,
+    example = example ?: "" ,
+    translation = translation ,
+    lastRepeat = LocalDateTime.now().atOffset(ZoneOffset.UTC)
+)
 
 fun DefinitionDto.toDefinition() = Definition(antonyms, definition, example ?: "", synonyms)
 

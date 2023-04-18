@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.brightflash.domain.game.repository.GameRepository
 import com.example.brightflash.domain.word.WordRepository
+import com.example.brightflash.domain.word.model.Word
 import com.example.brightflash.util.Constants
 import com.example.brightflash.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,6 +27,9 @@ class HomeViewModel @Inject constructor(
     private val _searchQuery = mutableStateOf<String>("")
     val searchQuery: State<String>
         get() = _searchQuery
+    private val _translationText = mutableStateOf("")
+    val translationText: State<String>
+        get() = _translationText
     private val _state = mutableStateOf(HomeScreenState(
         errorText = "",
         isLoading = false
@@ -84,6 +88,21 @@ class HomeViewModel @Inject constructor(
 
         }
     }
+    fun setTranslationValue(value: String){
+        _translationText.value = value
+    }
+
+    fun clearSearchQuery(){
+        _searchQuery.value =""
+    }
+
+    fun saveWord(word : Word){
+        viewModelScope.launch {
+            wordRepository.saveWordIntoDb(word)
+            _eventFlow.emit(UIEvent.CloseWordInfoCard)
+            _eventFlow.emit(UIEvent.ShowSnackBar)
+        }
+    }
 
     sealed interface UIEvent{
         //When response is successful
@@ -94,6 +113,8 @@ class HomeViewModel @Inject constructor(
         data class ShowErrorCard(val msg: String) : UIEvent
         //close word card
         object CloseWordInfoCard : UIEvent
+        //show SnackBar when word is saved into db
+        object ShowSnackBar : UIEvent
     }
 
 

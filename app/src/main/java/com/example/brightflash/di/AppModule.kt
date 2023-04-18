@@ -3,6 +3,7 @@ package com.example.brightflash.di
 import android.app.Application
 import androidx.room.Room
 import com.example.brightflash.data.local.BrightFlashDatabase
+import com.example.brightflash.data.local.converters.Converters
 import com.example.brightflash.data.remote.DictionaryApi
 import com.example.brightflash.util.Constants
 import dagger.Module
@@ -19,10 +20,11 @@ object AppModule {
     @Provides
     @Singleton
     fun provideDatabase(application : Application): BrightFlashDatabase = Room.databaseBuilder(
-        application,
-        BrightFlashDatabase::class.java,
+        application ,
+        BrightFlashDatabase::class.java ,
         "brightflash_db"
-    ).build()
+    ).addTypeConverter(Converters())
+        .build()
 
     @Provides
     @Singleton

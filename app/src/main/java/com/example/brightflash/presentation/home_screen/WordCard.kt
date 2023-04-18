@@ -1,23 +1,27 @@
 package com.example.brightflash.presentation.home_screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.Card
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.brightflash.domain.word.model.Meaning
 
 @Composable
 fun WordCard(
-    meanings: List<Meaning>,
-    word: String,
-    modifier : Modifier = Modifier,
-    onclick : () -> Unit
+    meanings: List<Meaning> ,
+    word: String ,
+    modifier : Modifier = Modifier ,
+    onClose : () -> Unit ,
+    onSave : () -> Unit ,
+    onTranslationValueChanged: (String) -> Unit,
+    translationValue : String
+
     ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -28,6 +32,12 @@ fun WordCard(
                     fontSize = 24.sp
                 )
             }
+            TextField(
+                value = translationValue ,
+                onValueChange = onTranslationValueChanged ,
+                placeholder = { Text(text = "Enter translation") },
+                modifier = Modifier.fillMaxWidth()
+            )
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
                 Text(
                     text = "Definitions",
@@ -41,7 +51,9 @@ fun WordCard(
                     example = it.definitions.first().example
                 )
             }
-            CardButton(onclick = onclick)
+            CardButton(label = "Save", color = Color.Green, onclick = onSave)
+            Spacer(modifier = Modifier.height(4.dp))
+            CardButton(label = "Close", color = Color.Red, onclick = onClose)
 
         }
     }
@@ -76,9 +88,16 @@ fun WordInfoSegment(
 @Composable
 fun CardButton(
     modifier : Modifier = Modifier,
+    label: String,
+    color: Color,
     onclick: () -> Unit
 ) {
-    Button(onClick = onclick, modifier = Modifier.fillMaxWidth()) {
-        Text(text = "Close")
+    Button(
+        onClick = onclick ,
+        modifier = Modifier
+            .fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(backgroundColor = color)
+    ) {
+        Text(text = label)
     }
 }

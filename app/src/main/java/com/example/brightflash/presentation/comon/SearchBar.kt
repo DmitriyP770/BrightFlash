@@ -1,5 +1,6 @@
 package com.example.brightflash.presentation.comon
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -18,7 +19,8 @@ fun SearchBar(
     keyboardOptions : KeyboardOptions,
     keyboardActions : KeyboardActions,
     onQueryChanged: (String) -> Unit,
-    modifier : Modifier = Modifier
+    modifier : Modifier = Modifier,
+    onClearQuery: () -> Unit
 ) {
     OutlinedTextField(
         value = searchQuery ,
@@ -30,7 +32,8 @@ fun SearchBar(
         )},
         trailingIcon = { Icon(
             imageVector = Icons.Default.Close ,
-            contentDescription = "Delete search query"
+            contentDescription = "Delete search query",
+            modifier = Modifier.clickable(onClick = onClearQuery)
         )},
         modifier = modifier.fillMaxWidth(),
         keyboardActions = keyboardActions,
