@@ -12,5 +12,5 @@ data class WordEntity(
     val example: String?,
     val translation: String,
     val qtyOfRepeats: Int = 0,
-    val lastRepeat: OffsetDateTime?
+    val lastRepeat: OffsetDateTime? = null
 )

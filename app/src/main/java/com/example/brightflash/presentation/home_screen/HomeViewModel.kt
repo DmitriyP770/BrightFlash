@@ -56,11 +56,15 @@ class HomeViewModel @Inject constructor(
                                 errorText = result.msg,
                                 isError = true
                             )
-                            _eventFlow.emit(
-                                UIEvent.ShowErrorCard(
-                                    msg = _state.value.errorText ?: " An error occurred"
+                            if (result.msg!!.contains("404")){
+                              _eventFlow.emit(UIEvent.ShowWordWasNotFoundCard)
+                            } else {
+                                _eventFlow.emit(
+                                    UIEvent.ShowErrorCard(
+                                        msg = _state.value.errorText ?: " An error occurred"
+                                    )
                                 )
-                            )
+                            }
                         }
                         is Resource.Loading -> {
                             _state.value = _state.value.copy(
@@ -115,6 +119,9 @@ class HomeViewModel @Inject constructor(
         object CloseWordInfoCard : UIEvent
         //show SnackBar when word is saved into db
         object ShowSnackBar : UIEvent
+        //Show wen word is not found
+        object ShowWordWasNotFoundCard: UIEvent
+
     }
 
 

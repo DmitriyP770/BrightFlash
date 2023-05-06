@@ -11,7 +11,7 @@ interface WordRepository {
 
     suspend fun getWordDefinition(word: String): Flow<Resource<WordInfo>>
 
-    suspend fun getAllWords(): List<Word>
+    suspend fun getAllWords(): Flow<List<Word>>
 
     suspend fun saveWordIntoDb(word : Word)
 

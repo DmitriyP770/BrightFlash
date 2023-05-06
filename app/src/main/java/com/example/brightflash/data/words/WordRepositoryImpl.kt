@@ -1,14 +1,17 @@
 package com.example.brightflash.data.words
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.example.brightflash.data.local.BrightFlashDatabase
 import com.example.brightflash.data.remote.DictionaryApi
 import com.example.brightflash.domain.word.WordRepository
-import com.example.brightflash.domain.word.model.Meaning
 import com.example.brightflash.domain.word.model.Word
 import com.example.brightflash.domain.word.model.WordInfo
 import com.example.brightflash.util.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
 class WordRepositoryImpl @Inject constructor(
@@ -32,15 +35,19 @@ class WordRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getAllWords() : List<Word> {
-       return dao.getAllWords().map { it.toWord() }
-    }
+    override suspend fun getAllWords() : Flow<List<Word>>  = flow {
+        dao.getAllWords().collect {dbWords ->
+            emit(dbWords.map {it.toWord()})
+        }
+    }.flowOn(Dispatchers.IO)
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun saveWordIntoDb(word : Word) {
         dao.saveWord(word.toWordEntity())
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun deleteWord(word : Word) {
-        dao.deleteWord(word.word)
+        dao.deleteWord(word.toWordEntity())
     }
 }

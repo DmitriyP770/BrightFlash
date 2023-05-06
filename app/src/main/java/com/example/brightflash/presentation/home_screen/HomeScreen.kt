@@ -30,6 +30,9 @@ fun HomeScreen() {
     var shouldShowErrorCard by remember {
         mutableStateOf(false)
     }
+    var shouldShowWordNotFoundCard by remember {
+        mutableStateOf(false)
+    }
     val scaffoldState = rememberScaffoldState()
     LaunchedEffect(key1 = true ){
         viewModel.eventFlow.collectLatest {event ->
@@ -58,6 +61,11 @@ fun HomeScreen() {
                         "Word has been saved in your list"
                     )
                 }
+                HomeViewModel.UIEvent.ShowWordWasNotFoundCard ->{
+                    shouldShowWordNotFoundCard  =true
+                    shouldShowErrorCard = false
+
+                }
             }
         }
     }
@@ -68,6 +76,7 @@ fun HomeScreen() {
     ) {
         Column(modifier = Modifier
             .fillMaxSize()
+            .padding(vertical = 6.dp)
         ) {
             SearchBar(
                 searchQuery = viewModel.searchQuery.value ,
@@ -100,8 +109,11 @@ fun HomeScreen() {
                     CircularProgressIndicator()
                 }
             }
-            if (viewModel.state.value.isError){
+            if (shouldShowErrorCard){
                 ErrorCard(msg = viewModel.state.value.errorText ?: "Some error occurred")
+            }
+            if (shouldShowWordNotFoundCard){
+                ErrorCard(msg = "Word has not been found")
             }
         }
     }

@@ -1,10 +1,15 @@
 package com.example.brightflash.data.words
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.example.brightflash.data.local.BrightFlashDatabase
 import com.example.brightflash.domain.game.model.WordQuestion
 import com.example.brightflash.domain.game.repository.GameRepository
+import com.example.brightflash.domain.game.word_flashcards.WordFlashCard
 import com.example.brightflash.domain.word.model.Word
 import com.example.brightflash.util.Resource
+import com.example.brightflash.util.toWord
+import com.example.brightflash.util.toWordEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -61,5 +66,22 @@ class GameRepositoryImpl @Inject constructor(
         TODO("Not yet implemented")
     }
 
+    override fun showWordCard() : WordFlashCard {
+        TODO("Not yet implemented")
+    }
 
+    override fun getWordsForWordCard() : Flow<Resource<List<Word>>> = flow {
+        emit(Resource.Loading())
+        val words = db.dao.getRandomTenWords()
+        if (words.isEmpty()){
+            emit(Resource.Error(msg = "List is empty"))
+        } else{
+            emit(Resource.Success(data = words.map { it.toWord() }))
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override suspend fun updateWordRepeats(word : Word) {
+        db.dao.updateWord(word.toWordEntity())
+    }
 }

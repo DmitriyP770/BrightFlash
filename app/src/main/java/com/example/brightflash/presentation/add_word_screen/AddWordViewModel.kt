@@ -17,10 +17,32 @@ class AddWordViewModel @Inject constructor(
     private val _translationValue = mutableStateOf("")
     val translationValue: State<String>
         get() = _translationValue
+    private val _wordValue = mutableStateOf("")
+    val wordValue: State<String>
+        get() = _wordValue
+    private val _exampleValue = mutableStateOf("")
+    val exampleValue: State<String>
+        get() = _exampleValue
 
-    fun saveWordIntoDb(word : Word){
+    fun saveWordIntoDb(){
         viewModelScope.launch {
-            repository.saveWordIntoDb(word)
+            repository.saveWordIntoDb(word = Word(
+                word = _wordValue.value ,
+                translation = _translationValue.value
+            ))
         }
     }
+
+    fun setWordValue(word: String){
+        _wordValue.value = word
+    }
+
+    fun setTranslationValue(translation: String){
+        _translationValue.value = translation
+    }
+
+    fun setExampleValue(example: String){
+        _exampleValue.value = example
+    }
+
 }

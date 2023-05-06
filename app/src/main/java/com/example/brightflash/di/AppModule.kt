@@ -23,7 +23,7 @@ object AppModule {
         application ,
         BrightFlashDatabase::class.java ,
         "brightflash_db"
-    ).addTypeConverter(Converters())
+    ).addTypeConverter(Converters()).fallbackToDestructiveMigration()
         .build()
 
     @Provides
