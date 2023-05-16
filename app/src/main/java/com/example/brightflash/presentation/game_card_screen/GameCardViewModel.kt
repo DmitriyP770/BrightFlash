@@ -2,18 +2,13 @@ package com.example.brightflash.presentation.game_card_screen
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.brightflash.domain.game.repository.GameRepository
 import com.example.brightflash.domain.word.model.Word
 import com.example.brightflash.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
 import javax.inject.Inject
@@ -23,12 +18,16 @@ class GameCardViewModel @Inject constructor(
     private val repository : GameRepository
 ): ViewModel(){
 
-    private val _gameState = mutableStateOf(GameCardState())
-    val gameState: State<GameCardState> = _gameState
+    private val _gameState = MutableStateFlow(GameCardState())
+    val gameState: SharedFlow<GameCardState> = _gameState.asSharedFlow()
     private val words = mutableListOf<Word>()
     private val _eventFlow = MutableSharedFlow<WordGameUIEvent>()
     val eventFlow: SharedFlow<WordGameUIEvent> = _eventFlow
     private var currentWordIndex = 0
+    private val _wordsStack: ArrayDeque<Word> = ArrayDeque()
+    private val isFirstLaunch: Boolean = false
+    private val _knownWords = mutableListOf<Word>()
+    private val _unknownWords = mutableListOf<Word>()
 
     private fun getListOfWords(){
         viewModelScope.launch {
@@ -42,25 +41,95 @@ class GameCardViewModel @Inject constructor(
                     }
                     is Resource.Success -> {
                         words.addAll(result.data!!)
+                        fillStack(words)
+                        showNextCard()
+
                     }
                 }
             }.launchIn(this)
         }
     }
 
+    private fun showNextCard(){
+        viewModelScope.launch {
+            if (_wordsStack.isNotEmpty()){
+                _eventFlow.emit(WordGameUIEvent.ShowWordCard)
+                val word = _wordsStack.removeLast()
+                _gameState.emit(GameCardState(currentWord = word))
+            } else if (isFirstLaunch){
+                _eventFlow.emit(WordGameUIEvent.ShowListIsEmptyCard)
+            } else{
+                _eventFlow.emit(WordGameUIEvent.ShowResultScreen)
+            }
+        }
+    }
+//loading words from db
+    //Show first Card
+    //Handle interaction -> change words
+    //if stack is empty -> show result screen
+    private fun fillStack(words: List<Word>){
+        //fill the stack
+        words.forEach {
+            _wordsStack.add(it)
+        }
+    }
+
+//    private fun conductGame(){
+//        viewModelScope.launch {
+//            _eventFlow.emit(WordGameUIEvent.ShowProgressBar)
+//            getListOfWords()
+//            if (_wordsStack.isEmpty()) {
+//                _eventFlow.emit(WordGameUIEvent.ShowListIsEmptyCard)
+//                return@launch
+//            } else{
+//                while (_wordsStack.isNotEmpty()) {
+//                    val word = _wordsStack.removeLast()
+//                    _gameState.emit(
+//                        GameCardState(
+//                            currentWord = word
+//                        )
+//                    )
+//                    _eventFlow.emit(WordGameUIEvent.ShowWordCard)
+//                }
+//                _eventFlow.emit(WordGameUIEvent.ShowResultScreen)
+//                return@launch
+//            }
+//
+//        }
+//
+//    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     fun handleUserInteraction(isKnown: Boolean , word : Word) = viewModelScope.launch {
         if (isKnown){
             val today = OffsetDateTime.now()
             var repeats = word.qtyOfRepeats
-            val newWord = word.copy(qtyOfRepeats = ++repeats, )
+            val newWord = word.copy(qtyOfRepeats = ++repeats, lastRepeate = today)
             repository.updateWordRepeats(newWord)
-            showNextWord()
+            _knownWords.add(word)
+            if (_wordsStack.isEmpty()){
+                _gameState.emit(GameCardState(
+                    isGameFinished = true ,
+                    knownWords = _knownWords ,
+                    unknownWords = _unknownWords
+                ))
+            } else{
+                showNextCard()
+            }
         } else{
-            showNextWord()
+            _unknownWords.add(word)
+            if (_wordsStack.isEmpty()){
+                _gameState.emit(GameCardState(
+                    isGameFinished = true ,
+                    knownWords = _knownWords ,
+                    unknownWords = _unknownWords
+                ))
+            } else{
+                showNextCard()
+            }
         }
-
     }
+
 
     private fun showNextWord(){
         val wordListSize = words.count()
@@ -81,15 +150,18 @@ class GameCardViewModel @Inject constructor(
     }
 
     init {
-        getListOfWords()
-        showNextWord()
+        viewModelScope.launch {
+            getListOfWords()
+        }
+
     }
 
 
     sealed interface WordGameUIEvent{
-
         object ShowListIsEmptyCard : WordGameUIEvent
         object ShowProgressBar : WordGameUIEvent
+        object ShowWordCard: WordGameUIEvent
+        object ShowResultScreen : WordGameUIEvent
 
     }
 }

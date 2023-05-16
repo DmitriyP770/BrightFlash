@@ -17,4 +17,6 @@ interface WordRepository {
 
     suspend fun deleteWord(word : Word)
 
+    suspend fun deleteWordBySpell(spell: String)
+
 }

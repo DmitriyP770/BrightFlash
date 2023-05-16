@@ -13,7 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.brightflash.presentation.HomeScreen
 import com.example.brightflash.presentation.home_screen.HomeViewModel
-import com.example.brightflash.presentation.navigation.MainScreen
+import com.example.brightflash.navigation.MainScreen
 import com.example.brightflash.presentation.ui.theme.BrightFlashTheme
 import dagger.hilt.android.AndroidEntryPoint
 

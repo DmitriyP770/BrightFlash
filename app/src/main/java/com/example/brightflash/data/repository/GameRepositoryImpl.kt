@@ -1,4 +1,4 @@
-package com.example.brightflash.data.words
+package com.example.brightflash.data.repository
 
 import android.os.Build
 import androidx.annotation.RequiresApi

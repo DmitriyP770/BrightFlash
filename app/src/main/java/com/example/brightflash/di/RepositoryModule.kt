@@ -1,7 +1,7 @@
 package com.example.brightflash.di
 
-import com.example.brightflash.data.words.GameRepositoryImpl
-import com.example.brightflash.data.words.WordRepositoryImpl
+import com.example.brightflash.data.repository.GameRepositoryImpl
+import com.example.brightflash.data.repository.WordRepositoryImpl
 import com.example.brightflash.domain.game.repository.GameRepository
 import com.example.brightflash.domain.word.WordRepository
 import dagger.Binds

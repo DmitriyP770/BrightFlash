@@ -4,15 +4,14 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.Card
-import androidx.compose.material.Colors
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.brightflash.domain.word.model.Word
 import kotlinx.coroutines.flow.collectLatest
 
@@ -20,29 +19,29 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun GameCardScreen(
     modifier : Modifier = Modifier,
-    word : Word,
     viewModel : GameCardViewModel
 ) {
-    LaunchedEffect(key1 = true){
-        viewModel.eventFlow.collectLatest { event->
-            when(event){
-                GameCardViewModel.WordGameUIEvent.ShowListIsEmptyCard -> {}
-                GameCardViewModel.WordGameUIEvent.ShowProgressBar -> {}
-            }
-        }
-    }
-    val state = viewModel.gameState.value
+
+    val state by viewModel.gameState.collectAsState(GameCardState())
     if (!state.isGameFinished){
         GameScreen(
             word = state.currentWord ,
             onKnowButtonClick = {
-                viewModel.handleUserInteraction(isKnown = true , word = word)
+                viewModel.handleUserInteraction(isKnown = true , word = state.currentWord)
             } ,
             onDunnoButtonClick = {
-                viewModel.handleUserInteraction(isKnown = false , word = word)
+                viewModel.handleUserInteraction(isKnown = false , word = state.currentWord)
 
-            }
+            },
+            modifier = Modifier.fillMaxSize()
         )
+    }
+    if (state.isLoading){
+        WordGameCardLoadingScreen()
+    }
+    
+    if (state.isGameFinished){
+        GameFinishScreen(knownWords = state.knownWords, unknownWords = state.unknownWords)
     }
 
 }
@@ -75,11 +74,46 @@ private fun WordGameCard(
 }
 
 @Composable
+private fun WordGameCardLoadingScreen(
+    modifier : Modifier = Modifier.fillMaxSize()
+) {
+    Box(contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+private fun GameFinishScreen(
+    modifier : Modifier = Modifier.fillMaxSize(),
+    knownWords: List<Word>,
+    unknownWords: List<Word>
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = "Overview", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(text = "Known Words: ", color = Color.Green)
+        Spacer(modifier = Modifier.height(8.dp))
+        knownWords.forEach {
+            Text(text = it.word)
+        }
+        Divider()
+        Text(text = "Unknown words:", color = Color.Red)
+        unknownWords.forEach {
+            Text(text = it.word)
+        }
+    }
+
+}
+
+@Composable
 fun GameScreen(
     modifier: Modifier = Modifier,
     word : Word,
     onKnowButtonClick: () -> Unit,
-    onDunnoButtonClick: () -> Unit
+    onDunnoButtonClick: () ->  Unit
 ) {
     var isGuessed by remember {
         mutableStateOf(false)
@@ -94,8 +128,8 @@ fun GameScreen(
             Button(
                 onClick = {
                     isGuessed = !isGuessed
-                    onKnowButtonClick
-                },
+                    onKnowButtonClick()
+                } ,
                 modifier = Modifier.background(color = Color.Green)
             ) {
                 Text(text = "Know")
@@ -103,7 +137,7 @@ fun GameScreen(
             Button(
                 onClick = {
                     isGuessed = !isGuessed
-                    onDunnoButtonClick
+                    onDunnoButtonClick()
                 } ,
                 modifier = Modifier.background(color = Color.Red)
             ) {

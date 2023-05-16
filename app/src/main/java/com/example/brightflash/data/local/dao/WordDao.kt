@@ -30,4 +30,7 @@ interface WordDao {
     @Update(entity = WordEntity::class, onConflict = OnConflictStrategy.REPLACE)
     suspend fun updateWord(wordEntity : WordEntity)
 
+    @Query("DELETE FROM WordEntity WHERE word = :spell")
+    suspend fun deleteByWordSpell(spell: String)
+
 }

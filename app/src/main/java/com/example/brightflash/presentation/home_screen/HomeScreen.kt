@@ -4,9 +4,12 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,7 +25,10 @@ import kotlinx.coroutines.flow.collectLatest
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    onAddWordClick: () -> Unit,
+    onPLayOneClick: () -> Unit
+) {
     val viewModel: HomeViewModel = hiltViewModel()
     var shouldShowWordCard by remember {
         mutableStateOf(false)
@@ -72,7 +78,16 @@ fun HomeScreen() {
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 6.dp)
+            .padding(horizontal = 6.dp),
+        floatingActionButton = {
+            FloatingActionButton(onClick = onAddWordClick
+            , shape = CircleShape) {
+                Icon(
+                    imageVector = Icons.Default.Add ,
+                    contentDescription = "add word"
+                )
+            }
+        }
     ) {
         Column(modifier = Modifier
             .fillMaxSize()
@@ -114,6 +129,9 @@ fun HomeScreen() {
             }
             if (shouldShowWordNotFoundCard){
                 ErrorCard(msg = "Word has not been found")
+            }
+            Button(onClick =  onPLayOneClick ) {
+                Text(text = "PLAY 1")
             }
         }
     }

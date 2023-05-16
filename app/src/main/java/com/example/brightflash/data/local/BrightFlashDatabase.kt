@@ -7,7 +7,7 @@ import com.example.brightflash.data.local.converters.Converters
 import com.example.brightflash.data.local.dao.WordDao
 import com.example.brightflash.data.local.models.WordEntity
 
-@Database(entities = [WordEntity::class], version = 3)
+@Database(entities = [WordEntity::class], version = 4)
 @TypeConverters(Converters::class)
 abstract class BrightFlashDatabase : RoomDatabase(){
     abstract val dao: WordDao

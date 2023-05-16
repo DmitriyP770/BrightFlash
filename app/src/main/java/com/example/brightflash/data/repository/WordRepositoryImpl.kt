@@ -1,4 +1,4 @@
-package com.example.brightflash.data.words
+package com.example.brightflash.data.repository
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -49,5 +49,9 @@ class WordRepositoryImpl @Inject constructor(
     @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun deleteWord(word : Word) {
         dao.deleteWord(word.toWordEntity())
+    }
+
+    override suspend fun deleteWordBySpell(spell : String) {
+        dao.deleteByWordSpell(spell)
     }
 }

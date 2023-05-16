@@ -1,25 +1,30 @@
 package com.example.brightflash.presentation.add_word_screen
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Button
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.flow.collectLatest
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun AddWordScreen(
-    viewModel : AddWordViewModel
+    viewModel : AddWordViewModel,
+    onBackClick: () -> Unit,
+    scaffoldState : ScaffoldState
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -36,17 +41,51 @@ fun AddWordScreen(
         focusManager.clearFocus()
     })
     val navController = rememberNavController()
-    Scaffold(modifier = Modifier.padding(horizontal = 6.dp).fillMaxSize()) {
+    Scaffold(
+        modifier = Modifier
+        .fillMaxSize(), topBar = {
+        TopAppBar(title = { Text(text = "Add Word") },
+            navigationIcon = {
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back to home screen"
+                )
+
+            }
+        },)
+    },
+        scaffoldState = scaffoldState
+
+        ) {
+        LaunchedEffect(key1 = true  ){
+            viewModel.eventFlow.collectLatest {
+                if (it == AddWordViewModel.AddWordUIEvent.ShowSnackBar){
+                    val snackBarResult =  scaffoldState.snackbarHostState.showSnackbar(
+                        message = "Word has been saved",
+                        duration = SnackbarDuration.Long,
+                        actionLabel = "Undo"
+                    )
+                    when(snackBarResult){
+                        SnackbarResult.Dismissed -> {}
+                        SnackbarResult.ActionPerformed -> {viewModel.dismissSavingWord()}
+                    }
+
+                }
+            }
+        }
         Column(modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 6.dp)
+            .padding(it)
+            .padding(horizontal = 8.dp)
         ) {
             TextField(
                 value = viewModel.wordValue.value ,
                 onValueChange = viewModel::setWordValue ,
                 label = { Text(text = "Enter a word") },
                 keyboardActions = keyboardActionsFirst,
-                keyboardOptions = keyboardOptionsFirst
+                keyboardOptions = keyboardOptionsFirst,
+                modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(4.dp))
             TextField(
@@ -80,5 +119,6 @@ fun AddWordScreen(
 
         }
     }
+    BackHandler(onBack = onBackClick)
 
 }

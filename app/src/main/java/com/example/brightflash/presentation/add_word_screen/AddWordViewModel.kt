@@ -7,6 +7,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.brightflash.domain.word.WordRepository
 import com.example.brightflash.domain.word.model.Word
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,6 +26,8 @@ class AddWordViewModel @Inject constructor(
     private val _exampleValue = mutableStateOf("")
     val exampleValue: State<String>
         get() = _exampleValue
+    private val _eventFlow = MutableSharedFlow<AddWordUIEvent>()
+    val eventFlow: SharedFlow<AddWordUIEvent> = _eventFlow.asSharedFlow()
 
     fun saveWordIntoDb(){
         viewModelScope.launch {
@@ -30,6 +35,15 @@ class AddWordViewModel @Inject constructor(
                 word = _wordValue.value ,
                 translation = _translationValue.value
             ))
+            _eventFlow.emit(AddWordUIEvent.ShowSnackBar)
+            println("EVENTFLOWFROM ${_eventFlow}")
+        }
+    }
+
+    fun dismissSavingWord(){
+        viewModelScope.launch {
+            repository.deleteWordBySpell(_wordValue.value)
+            _eventFlow.emit(AddWordUIEvent.Empty)
         }
     }
 
@@ -43,6 +57,11 @@ class AddWordViewModel @Inject constructor(
 
     fun setExampleValue(example: String){
         _exampleValue.value = example
+    }
+
+    sealed interface AddWordUIEvent{
+        object ShowSnackBar : AddWordUIEvent
+        object Empty: AddWordUIEvent
     }
 
 }
